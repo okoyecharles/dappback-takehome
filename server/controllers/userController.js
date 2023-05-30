@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
+import moment from 'moment/moment.js';
 
 const secret = process.env.JWT_SECRET;
 const tokenExpiration = '7d';
@@ -72,16 +73,16 @@ export const login = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: 'Invalid credentials' });
     };
-
-    // If it has been more than 2 days since the last streak claim, reset the streak count
-    const { lastStreak } = existingUser;
-    const streakExpiration = new Date(lastStreak);
-    streakExpiration.setDate(streakExpiration.getDate() + 2);
-    const now = new Date();
-    if (now > streakExpiration) {
+    
+    // using moment.js, a users streak will be reset if now is greater than a day after their last streak
+    const now = moment();
+    const lastStreak = moment(existingUser.lastStreak);
+    const lastStreakNextDay = lastStreak.add(1, 'days');
+    
+    if (now.isAfter(lastStreakNextDay, 'day')) {
       existingUser.streakCount = 0;
     }
-
+    
     const token = generateToken(existingUser);
     res
       .status(200)
@@ -104,13 +105,10 @@ export const claimCoins = async (req, res) => {
     return res.status(404).json({ message: 'User does not exist' });
   }
 
-  // Can only claim once per day
-  const { lastStreak } = currentUser;
-  const streakExpiration = new Date(lastStreak);
-  streakExpiration.setDate(streakExpiration.getDate() + 1);
-  const now = new Date();
-  if (now < streakExpiration) {
-    return res.status(400).json({ message: 'You have already claimed your reward for today.' });
+  const now = moment();
+  const lastStreak = moment(currentUser.lastStreak);
+  if (now.isSame(lastStreak, 'day')) {
+    return res.status(400).json({ message: 'You have already claimed your coins for today.' });
   }
 
   try {
