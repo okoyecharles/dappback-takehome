@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
@@ -7,11 +7,11 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true, min: 6 },
     coins: { type: Number, default: 0 },
     streakCount: { type: Number, default: 0 },
-    lastStreak: { type: Date, default: Date.now },
+    lastStreak: { type: Date, default: new Date(Date.now() - 172800000) },
   },
   {
     timestamps: true,
   }
 );
 
-export default mongoose.model('User', UserSchema);
+export default mongoose.model("User", UserSchema);

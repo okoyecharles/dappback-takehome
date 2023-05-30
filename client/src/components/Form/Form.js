@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { validateEmail, validateName, validatePassword } from "./validate";
 import axios from "axios";
-
-const BACKEND_URL = "http://localhost:4000";
+import { BACKEND_URL } from "../../config";
+import { saveUser } from "../../utils";
 
 const Form = ({ closeModal, setUserUpdate }) => {
   const [formState, setFormState] = useState("login");
@@ -48,15 +48,9 @@ const Form = ({ closeModal, setUserUpdate }) => {
         formState === "login" ? "/api/users/login" : "/api/users/signup";
       const { data } = await axios.post(`${BACKEND_URL}${url}`, fields);
 
-      // Save user and token to local storage
-      const save = {
-        user: data.user,
-        token: data.token,
-      };
-      localStorage.setItem("dappback-user", JSON.stringify(save));
+      saveUser(data.user, data.token);
       setUserUpdate({});
     } catch (error) {
-      console.log(error.response.data.message);
       setError(error.response.data.message);
       setLoading(false);
       return;

@@ -1,50 +1,24 @@
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
-import Button from "./components/Button/Button";
-import Logo from "./components/assets/logo.png";
-import Coin from "./components/assets/coin.png";
-import DBCoin from "./components/assets/db-coin.png";
-import Avatar from "./components/assets/avatar.png";
-import Flame from "./components/assets/flame.png";
+import React, { useMemo, useState } from "react";
+import Button from "../Button/Button";
+import Logo from "../assets/logo.png";
+import Coin from "../assets/coin.png";
+import DBCoin from "../assets/db-coin.png";
+import Avatar from "../assets/avatar.png";
+import Flame from "../assets/flame.png";
 
 import Pluralize from "react-pluralize";
 import Modal from "react-modal";
-import Form from "./components/Form/Form";
+import Form from "../Form/Form";
 import moment from "moment";
 import axios from "axios";
+import { calculateReward, clearUser, customModalStyles, saveUser } from "../../utils";
+import { BACKEND_URL } from "../../config";
 
 Modal.setAppElement("#root");
 
-const customStyles = {
-  content: {
-    backgroundColor: "#313146",
-    maxWidth: "600px",
-    width: "calc(100% - 2rem)",
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    transform: "translate(-50%, -50%)",
-    border: "none",
-  },
-  overlay: {
-    backgroundColor: "rgba(0, 0, 0, 0.75)",
-  },
-};
-
-const BACKEND_URL = "http://localhost:4000";
-
-const COIN_BONUS = 10;
-const STREAK_BONUS = 5;
-const calculateReward = (user) => {
-  const reward = COIN_BONUS + user.streakCount * STREAK_BONUS;
-  return reward;
-};
-
 function App() {
-  // try to retrieve user and token data from local storage if it exists in useEffect
   const [userUpdate, setUserUpdate] = useState({});
   const { user, token } = useMemo(() => {
-    console.log("updating user");
     const data = localStorage.getItem("dappback-user");
     if (data) {
       return JSON.parse(data);
@@ -66,6 +40,12 @@ function App() {
 
   const [rewardError, setRewardError] = useState(null);
   const [rewardLoading, setRewardLoading] = useState(null);
+  const rewardClaimed = useMemo(() => {
+    if (!user) return false;
+    const lastStreak = moment(user.lastStreak);
+    const today = moment();
+    return lastStreak.isSame(today, "day");
+  }, [user]);
 
   const claimReward = async () => {
     if (!user) {
@@ -89,14 +69,8 @@ function App() {
         }
       );
 
-      // Save user and token to local storage
-      const save = {
-        user: data.user,
-        token,
-      };
+      saveUser(data.user, token);
       setRewardLoading(false);
-
-      localStorage.setItem("dappback-user", JSON.stringify(save));
       setUserUpdate({});
     } catch (error) {
       setRewardError(error.response.data.message);
@@ -107,13 +81,6 @@ function App() {
     setRewardLoading(true);
     setRewardError(null);
   };
-
-  const rewardClaimed = useMemo(() => {
-    if (!user) return false;
-    const lastStreak = moment(user.lastStreak);
-    const today = moment();
-    return lastStreak.isSame(today, "day");
-  }, [user]);
 
   return (
     <main className="App flex flex-col" id="app">
@@ -144,8 +111,8 @@ function App() {
                     : "-translate-y-4 opacity-0 scale-50 pointer-events-none"
                 } transition-all`}
                 onClick={() => {
+                  clearUser();
                   closeModal();
-                  localStorage.removeItem("dappback-user");
                   setUserUpdate({});
                 }}
               >
@@ -235,7 +202,7 @@ function App() {
         isOpen={modalIsOpen && !user}
         onRequestClose={closeModal}
         contentLabel="Login Modal"
-        style={customStyles}
+        style={customModalStyles}
       >
         <Form closeModal={closeModal} setUserUpdate={setUserUpdate} />
       </Modal>

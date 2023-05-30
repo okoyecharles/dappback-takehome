@@ -6,9 +6,6 @@ import moment from 'moment/moment.js';
 const secret = process.env.JWT_SECRET;
 const tokenExpiration = '7d';
 
-const COIN_BONUS = 10;
-const STREAK_BONUS = 5;
-
 const generateToken = (user) => {
   const token = jwt.sign(
     { email: user.email, id: user._id },
@@ -16,6 +13,13 @@ const generateToken = (user) => {
     { expiresIn: tokenExpiration }
   );
   return token;
+}
+
+const COIN_BONUS = 10;
+const STREAK_BONUS = 5;
+const calculateReward = (user) => {
+  const reward = COIN_BONUS + (user.streakCount * STREAK_BONUS);
+  return reward;
 }
 
 /*
@@ -122,9 +126,4 @@ export const claimCoins = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Something went wrong.' });
   }
-}
-
-const calculateReward = (user) => {
-  const reward = COIN_BONUS + (user.streakCount * STREAK_BONUS);
-  return reward;
 }
