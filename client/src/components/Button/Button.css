@@ -1,0 +1,63 @@
+#root {
+  --ui-button-color: #C3B5FD;
+  --ui-button-hv-color: #b9a8fe;
+  --ui-button-text-color: #000;
+  --ui-button-border-color: #ffffff00;
+  --ui-button-border-hv-color: #ffffff00;
+  --ui-button-border-fc-color: #fff;
+  --ui-button-circle-color: #00000035;
+}
+
+
+.ui-button {
+  --ui-button-circle-pos-x: 0;
+  --ui-button-circle-pos-y: 0;
+
+  overflow: hidden;
+  border: none;
+  border-radius: 1.25rem;
+  cursor: pointer;
+  background-color: var(--ui-button-color);
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--ui-button-text-color);
+  padding-block: 0.5rem;
+  padding-inline: 1.25rem;
+  height: fit-content;
+  position: relative;
+  isolation: isolate;
+  outline: none;
+  outline-offset: 0px;
+
+  transition: background-color 500ms ease, border 150ms ease;
+}
+.ui-button:focus {
+  background-color: var(--ui-button-hv-color);
+}
+
+.ui-button:focus-visible  {
+  outline: 1px solid var(--ui-button-border-fc-color);
+  outline-offset: 3px;
+}
+
+.ui-button::before {
+  content: '';
+  z-index: -1;
+  position: absolute;
+  background: var(--ui-button-circle-color);
+  width: 312%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  left: var(--ui-button-circle-pos-x);
+  top: var(--ui-button-circle-pos-y);
+
+  transition: transform 200ms ease-in, opacity 300ms ease;
+}
+
+.ui-button.clicked::before {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  transition: transform 400ms cubic-bezier(0.68, 0.08, 1, 1), opacity 150ms ease;
+}
