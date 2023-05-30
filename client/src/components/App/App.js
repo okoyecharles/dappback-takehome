@@ -11,7 +11,12 @@ import Modal from "react-modal";
 import Form from "../Form/Form";
 import moment from "moment";
 import axios from "axios";
-import { calculateReward, clearUser, customModalStyles, saveUser } from "../../utils";
+import {
+  calculateReward,
+  clearUser,
+  customModalStyles,
+  saveUser,
+} from "../../utils";
 import { BACKEND_URL } from "../../config";
 
 Modal.setAppElement("#root");
@@ -71,15 +76,13 @@ function App() {
 
       saveUser(data.user, token);
       setRewardLoading(false);
+      setRewardError(null);
       setUserUpdate({});
     } catch (error) {
       setRewardError(error.response.data.message);
       setRewardLoading(false);
       return;
     }
-
-    setRewardLoading(true);
-    setRewardError(null);
   };
 
   return (
@@ -184,10 +187,10 @@ function App() {
                 onClick={claimReward}
                 disabled={rewardLoading || rewardClaimed}
               >
-                {rewardClaimed
-                  ? "Today's reward claimed"
-                  : rewardLoading
+                {rewardLoading
                   ? "Claiming..."
+                  : rewardClaimed
+                  ? "Today's reward claimed"
                   : "Claim Reward"}
               </Button>
               <span className="reward-error text-ss opacity-95 mt-4">
