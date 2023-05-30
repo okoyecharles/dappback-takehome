@@ -1,11 +1,12 @@
-import dotenv from "dotenv";
-dotenv.config();
+import "dotenv/config.js";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import colors from "@colors/colors/safe.js";
+
+import userRouter from "./routes/userRoutes.js";
 
 const app = express();
 
@@ -18,6 +19,8 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.send("Dappback Takehome API!");
 });
+
+app.use('/api/users', userRouter);
 
 const PORT = +process.env.PORT;
 const CONNECTION_URI = process.env.MONGO_URI;
